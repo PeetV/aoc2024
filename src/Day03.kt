@@ -8,12 +8,12 @@ fun main() {
         return input.size
     }
 
-    // Test input from the `src/Day02_test.txt` file
-    val testInput = readInput("Day02_test")
+    // Test input from the `src/Day03_test.txt` file
+    val testInput = readInput("Day03_test")
     check(part1(testInput) == 1)
 
-    // Input from the `src/Day02.txt` file
-    val input = readInput("Day02")
+    // Input from the `src/Day03.txt` file
+    val input = readInput("Day03")
     part1(input).println()
     part2(input).println()
 }

@@ -4,36 +4,29 @@ fun main() {
 
     fun extractLists(input: List<String>): Pair<List<Int>, List<Int>> {
         val numberPairRegex = Regex("""\s*(\d+)\s+(\d+)""")
-        val numberPairs = input.map { line ->
-            numberPairRegex.find(line)?.let { matchResult ->
-                matchResult.groupValues[1].toInt() to matchResult.groupValues[2].toInt()
-            }
-        }
-        val list1Sorted = numberPairs.map { it?.first ?: 0 }.sorted()
-        val list2Sorted = numberPairs.map { it?.second ?: 0 }.sorted()
-        return list1Sorted to list2Sorted
+        return input.map { line ->
+            val matchResult = numberPairRegex.find(line)!!
+            matchResult.groupValues[1].toInt() to matchResult.groupValues[2].toInt()
+        }.unzip()
     }
 
-    fun part1(input: List<String>): Int {
-        val (list1Sorted, list2Sorted) = extractLists(input)
-        return list1Sorted.zip(list2Sorted).sumOf { abs(it.first - it.second) }
+    fun part1(list1: List<Int>, list2: List<Int>): Int {
+        return list1.sorted().zip(list2.sorted()).sumOf { abs(it.first - it.second) }
     }
 
-    fun part2(input: List<String>): Int {
-        val (list1Sorted, list2Sorted) = extractLists(input)
-        return list1Sorted.sumOf { list1Number ->
-            list1Number * list2Sorted.count { it == list1Number }
-        }
+    fun part2(list1: List<Int>, list2: List<Int>): Int {
+        val counts = list2.groupingBy { it }.eachCount()
+        return list1.sumOf { it * counts.getOrDefault(it, 0) }
     }
 
     // Test input from the `src/Day01_test.txt` file
-    val testInput = readInput("Day01_test")
-    check(part1(testInput) == 11)
-    check(part2(testInput) == 31)
+    val (a, b) = extractLists(readInput("Day01_test"))
+    check(part1(a, b) == 11)
+    check(part2(a, b) == 31)
 
     // Input from the `src/Day01.txt` file
-    val input = readInput("Day01")
-    part1(input).println()
-    part2(input).println()
+    val (c, d) = extractLists(readInput("Day01"))
+    part1(c, d).println()
+    part2(c, d).println()
 
 }
