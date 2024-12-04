@@ -23,7 +23,7 @@ fun main() {
         }
     }
 
-    fun extractBottomToTopDiagonals(input: List<String>): List<String> {
+    fun extractRightUpDiagonals(input: List<String>): List<String> {
         val result = mutableListOf<String>()
         val numberOfRows = input.count()
         val numberOfColumns = input.first().count()
@@ -39,7 +39,7 @@ fun main() {
         return result
     }
 
-    fun extractTopToBottomDiagonals(input: List<String>): List<String> {
+    fun extractLeftUpDiagonals(input: List<String>): List<String> {
         val result = mutableListOf<String>()
         val numberOfRows = input.count()
         val numberOfColumns = input.first().count()
@@ -59,11 +59,11 @@ fun main() {
         val rowsCount = input.sumOf { countMatches(it) }
         val columns = extractColumns(input)
         val columnsCount = columns.sumOf { countMatches(it) }
-        val bottomToTopDiagonals = extractBottomToTopDiagonals(input)
-        val bottomToTopDiagonalsCount = bottomToTopDiagonals.sumOf { countMatches(it) }
-        val topToBottomDiagonals = extractTopToBottomDiagonals(input)
-        val topToBottomDiagonalsCount = topToBottomDiagonals.sumOf { countMatches(it) }
-        return rowsCount + columnsCount + bottomToTopDiagonalsCount + topToBottomDiagonalsCount
+        val rightUpDiagonals = extractRightUpDiagonals(input)
+        val rightUpDiagonalsCount = rightUpDiagonals.sumOf { countMatches(it) }
+        val leftUpDiagonals = extractLeftUpDiagonals(input)
+        val leftUpDiagonalsCount = leftUpDiagonals.sumOf { countMatches(it) }
+        return rowsCount + columnsCount + rightUpDiagonalsCount + leftUpDiagonalsCount
     }
 
     fun part2(input: List<String>): Int {
