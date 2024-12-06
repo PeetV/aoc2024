@@ -4,16 +4,73 @@ import kotlin.io.path.Path
 import kotlin.io.path.readText
 
 /**
- * Reads lines from the given input txt file.
+ * Read lines from the given input text file name (without including the .txt extension in the name).
  */
 fun readInput(name: String) = Path("src/$name.txt").readText().trim().lines()
 
 /**
- * Converts string to md5 hash.
+ * Convert a string to a md5 hash.
  */
 fun String.md5() = BigInteger(1, MessageDigest.getInstance("MD5").digest(toByteArray())).toString(16).padStart(32, '0')
 
 /**
- * The cleaner shorthand for printing output.
+ * Shorthand for printing output.
  */
 fun Any?.println() = println(this)
+
+/**
+ * A grid of characters.
+ */
+class Grid(input: List<String>) {
+    val numberOfRows: Int = input.count()
+    val numberOfColumns: Int = input.first().count()
+    val data = input.map { it.toCharArray().toMutableList() }
+
+    init {
+        if (!input.all { it.count() == numberOfColumns }) {
+            throw IllegalArgumentException("Input rows must all be the same length to create a grid")
+        }
+    }
+
+    enum class Direction {
+        Up, Down, Left, Right, UpLeft, UpRight, DownLeft, DownRight
+    }
+
+    fun toListString(): List<String> = data.map { it.joinToString("") }
+
+    /**
+     * Find the first location of a character searching columns by row (left to right, row by row).
+     */
+    fun findLocation(character: Char): Pair<Int, Int>? {
+        for (rowIndex in 0..<numberOfRows) {
+            for (columnIndex in 0..<numberOfColumns) {
+                if (data[rowIndex][columnIndex] == character) {
+                    return columnIndex to rowIndex
+                }
+            }
+        }
+        return null
+    }
+
+    /**
+     * Get the character at a location.
+     */
+    fun getCharacter(location: Pair<Int, Int>): Char = data[location.second][location.first]
+
+    /**
+     * Set the character at a location.
+     */
+    fun setCharacter(location: Pair<Int, Int>, character: Char) {
+        data[location.second][location.first] = character
+    }
+
+    /**
+     * Check if a location is inside the bounds of the grid.
+     */
+    fun isInBounds(location: Pair<Int, Int>): Boolean {
+        if (location.first < 0 || location.first > (numberOfColumns - 1)) return false
+        if (location.second < 0 || location.second > (numberOfRows - 1)) return false
+        return true
+    }
+
+}
