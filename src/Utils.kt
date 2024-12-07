@@ -4,6 +4,13 @@ import kotlin.io.path.Path
 import kotlin.io.path.readText
 
 /**
+ * An enum of directions on a grid.
+ */
+enum class Direction {
+    Up, Down, Left, Right // UpLeft, UpRight, DownLeft, DownRight
+}
+
+/**
  * Read lines from the given input text file name (without including the .txt extension in the name).
  */
 fun readInput(name: String) = Path("src/$name.txt").readText().trim().lines()
@@ -32,10 +39,6 @@ class CharacterGrid(input: List<String>) {
         }
     }
 
-    enum class Direction {
-        Up, Down, Left, Right // UpLeft, UpRight, DownLeft, DownRight
-    }
-
     /**
      * A sequence of locations in the grid, iterating by column then row, top down.
      */
@@ -48,19 +51,26 @@ class CharacterGrid(input: List<String>) {
             }
         }
 
-    fun toListString(): List<String> = data.map { it.joinToString("") }
-
     /**
-     * Find the first location of a character searching columns by row (left to right, row by row).
+     * A sequence of rows returned as strings.
      */
-    fun findLocation(character: Char): Pair<Int, Int>? {
-        for ((columnIndex, rowIndex) in indices) {
-            if (data[rowIndex][columnIndex] == character) {
-                return columnIndex to rowIndex
+    val rowStrings: Sequence<String>
+        get() = sequence {
+            for (row in data) {
+                yield(row.joinToString(""))
             }
         }
-        return null
-    }
+
+    /**
+     * A sequence of columns returned as strings.
+     */
+    val columnStrings: Sequence<String>
+        get() = sequence {
+            for (columnIndex in 0..<numberOfColumns) {
+                val column = (0..<numberOfRows).map { rowIndex -> data[rowIndex][columnIndex] }
+                yield(column.joinToString(""))
+            }
+        }
 
     /**
      * Get the character at a location.
@@ -72,6 +82,22 @@ class CharacterGrid(input: List<String>) {
      */
     fun setCharacter(location: Pair<Int, Int>, character: Char) {
         data[location.second][location.first] = character
+    }
+
+    override fun toString(): String = data.joinToString("\n") { it.joinToString("") }
+
+    fun toStringList(): List<String> = data.map { it.joinToString("") }
+
+    /**
+     * Find the first location of a character searching columns by row (left to right, row by row).
+     */
+    fun findLocation(character: Char): Pair<Int, Int>? {
+        for ((columnIndex, rowIndex) in indices) {
+            if (data[rowIndex][columnIndex] == character) {
+                return columnIndex to rowIndex
+            }
+        }
+        return null
     }
 
     /**

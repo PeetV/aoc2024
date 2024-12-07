@@ -1,29 +1,29 @@
 fun main() {
 
-    fun nextLocation(grid: CharacterGrid, location: Pair<Int, Int>, direction: CharacterGrid.Direction): Pair<Int, Int>? {
+    fun nextLocation(grid: CharacterGrid, location: Pair<Int, Int>, direction: Direction): Pair<Int, Int>? {
         val nextLocation = when (direction) {
-            CharacterGrid.Direction.Up -> location.first to (location.second - 1)
-            CharacterGrid.Direction.Down -> location.first to (location.second + 1)
-            CharacterGrid.Direction.Left -> (location.first - 1) to location.second
-            CharacterGrid.Direction.Right -> (location.first + 1) to location.second
+            Direction.Up -> location.first to (location.second - 1)
+            Direction.Down -> location.first to (location.second + 1)
+            Direction.Left -> (location.first - 1) to location.second
+            Direction.Right -> (location.first + 1) to location.second
         }
         if (!grid.isInBounds(nextLocation)) return null
         return nextLocation
     }
 
-    fun changeDirectionOnBlock(direction: CharacterGrid.Direction): CharacterGrid.Direction {
+    fun changeDirectionOnBlock(direction: Direction): Direction {
         return when (direction) {
-            CharacterGrid.Direction.Up -> CharacterGrid.Direction.Right
-            CharacterGrid.Direction.Down -> CharacterGrid.Direction.Left
-            CharacterGrid.Direction.Left -> CharacterGrid.Direction.Up
-            CharacterGrid.Direction.Right -> CharacterGrid.Direction.Down
+            Direction.Up -> Direction.Right
+            Direction.Down -> Direction.Left
+            Direction.Left -> Direction.Up
+            Direction.Right -> Direction.Down
         }
     }
 
     fun part1(input: List<String>): Int {
         val characterGrid = CharacterGrid(input)
         var location = characterGrid.findLocation('^') ?: (0 to 0)
-        var direction = CharacterGrid.Direction.Up
+        var direction = Direction.Up
         var iterations = 0
         val maxIterations = 10_000
         var visited = mutableSetOf(location)
@@ -54,7 +54,7 @@ fun main() {
                     val newCharacterGrid = CharacterGrid(input)
                     if (newCharacterGrid.getCharacter(columnIndex to rowIndex) == '#') continue
                     newCharacterGrid.setCharacter(columnIndex to rowIndex, '#')
-                    part1(newCharacterGrid.toListString())
+                    part1(newCharacterGrid.toStringList())
                 } catch (_: Throwable) {
                     infiniteLoopCount += 1
                 }
