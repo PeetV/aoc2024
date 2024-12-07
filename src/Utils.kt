@@ -7,7 +7,7 @@ import kotlin.io.path.readText
  * An enum of directions on a grid.
  */
 enum class Direction {
-    Up, Down, Left, Right, UpLeft, UpRight, DownLeft, DownRight
+    North, South, West, East, NorthWest, NorthEast, SouthWest, SouthEast
 }
 
 /**
@@ -122,7 +122,7 @@ class XYLocation(var x: Int, var y: Int, var direction: Direction?) {
      */
     var xy: Pair<Int, Int>
         get() = x to y
-        set(xy: Pair<Int, Int>) {
+        set(xy) {
             x = xy.first
             y = xy.second
         }
@@ -133,14 +133,14 @@ class XYLocation(var x: Int, var y: Int, var direction: Direction?) {
     fun nextLocation(direction: Direction): XYLocation {
         this.direction = direction
         return when (direction) {
-            Direction.Up -> XYLocation(x, y - 1, direction)
-            Direction.Down -> XYLocation(x, y + 1, direction)
-            Direction.Left -> XYLocation(x - 1, y, direction)
-            Direction.Right -> XYLocation(x + 1, y, direction)
-            Direction.UpLeft -> XYLocation(x - 1, y - 1, direction)
-            Direction.UpRight -> XYLocation(x + 1, y - 1, direction)
-            Direction.DownLeft -> XYLocation(x - 1, y + 1, direction)
-            Direction.DownRight -> XYLocation(x + 1, y + 1, direction)
+            Direction.North -> XYLocation(x, y - 1, direction)
+            Direction.South -> XYLocation(x, y + 1, direction)
+            Direction.West -> XYLocation(x - 1, y, direction)
+            Direction.East -> XYLocation(x + 1, y, direction)
+            Direction.NorthWest -> XYLocation(x - 1, y - 1, direction)
+            Direction.NorthEast -> XYLocation(x + 1, y - 1, direction)
+            Direction.SouthWest -> XYLocation(x - 1, y + 1, direction)
+            Direction.SouthEast -> XYLocation(x + 1, y + 1, direction)
         }
     }
 

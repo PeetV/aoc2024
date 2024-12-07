@@ -2,10 +2,10 @@ fun main() {
 
     fun nextLocation(grid: CharacterGrid, location: Pair<Int, Int>, direction: Direction): Pair<Int, Int>? {
         val nextLocation:  Pair<Int, Int> = when (direction) {
-            Direction.Up -> location.first to (location.second - 1)
-            Direction.Down -> location.first to (location.second + 1)
-            Direction.Left -> (location.first - 1) to location.second
-            Direction.Right -> (location.first + 1) to location.second
+            Direction.North -> location.first to (location.second - 1)
+            Direction.South -> location.first to (location.second + 1)
+            Direction.West -> (location.first - 1) to location.second
+            Direction.East -> (location.first + 1) to location.second
             else -> location.first to (location.second - 1)
         }
         if (!grid.isInBounds(nextLocation)) return null
@@ -14,11 +14,11 @@ fun main() {
 
     fun changeDirectionOnBlock(direction: Direction): Direction {
         val newDirection: Direction = when (direction) {
-            Direction.Up -> Direction.Right
-            Direction.Down -> Direction.Left
-            Direction.Left -> Direction.Up
-            Direction.Right -> Direction.Down
-            else -> Direction.Up
+            Direction.North -> Direction.East
+            Direction.South -> Direction.West
+            Direction.West -> Direction.North
+            Direction.East -> Direction.South
+            else -> Direction.North
         }
         return newDirection
     }
@@ -26,7 +26,7 @@ fun main() {
     fun part1(input: List<String>): Int {
         val characterGrid = CharacterGrid(input)
         var location = characterGrid.findLocation('^') ?: (0 to 0)
-        var direction = Direction.Up
+        var direction = Direction.North
         var iterations = 0
         val maxIterations = 10_000
         var visited = mutableSetOf(location)
