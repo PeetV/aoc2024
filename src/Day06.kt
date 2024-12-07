@@ -1,39 +1,37 @@
 fun main() {
 
-    fun nextLocation(grid: Grid, location: Pair<Int, Int>, direction: Grid.Direction): Pair<Int, Int>? {
+    fun nextLocation(grid: CharacterGrid, location: Pair<Int, Int>, direction: CharacterGrid.Direction): Pair<Int, Int>? {
         val nextLocation = when (direction) {
-            Grid.Direction.Up -> location.first to (location.second - 1)
-            Grid.Direction.Down -> location.first to (location.second + 1)
-            Grid.Direction.Left -> (location.first - 1) to location.second
-            Grid.Direction.Right -> (location.first + 1) to location.second
-            else -> return null
+            CharacterGrid.Direction.Up -> location.first to (location.second - 1)
+            CharacterGrid.Direction.Down -> location.first to (location.second + 1)
+            CharacterGrid.Direction.Left -> (location.first - 1) to location.second
+            CharacterGrid.Direction.Right -> (location.first + 1) to location.second
         }
         if (!grid.isInBounds(nextLocation)) return null
         return nextLocation
     }
 
-    fun changeDirectionOnBlock(direction: Grid.Direction): Grid.Direction {
+    fun changeDirectionOnBlock(direction: CharacterGrid.Direction): CharacterGrid.Direction {
         return when (direction) {
-            Grid.Direction.Up -> Grid.Direction.Right
-            Grid.Direction.Down -> Grid.Direction.Left
-            Grid.Direction.Left -> Grid.Direction.Up
-            Grid.Direction.Right -> Grid.Direction.Down
-            else -> Grid.Direction.Up
+            CharacterGrid.Direction.Up -> CharacterGrid.Direction.Right
+            CharacterGrid.Direction.Down -> CharacterGrid.Direction.Left
+            CharacterGrid.Direction.Left -> CharacterGrid.Direction.Up
+            CharacterGrid.Direction.Right -> CharacterGrid.Direction.Down
         }
     }
 
     fun part1(input: List<String>): Int {
-        val grid = Grid(input)
-        var location = grid.findLocation('^') ?: (0 to 0)
-        var direction = Grid.Direction.Up
+        val characterGrid = CharacterGrid(input)
+        var location = characterGrid.findLocation('^') ?: (0 to 0)
+        var direction = CharacterGrid.Direction.Up
         var iterations = 0
         val maxIterations = 10_000
         var visited = mutableSetOf(location)
         while (iterations < maxIterations) {
             iterations += 1
-            val next = nextLocation(grid, location, direction)
+            val next = nextLocation(characterGrid, location, direction)
             if (next == null) break
-            if (grid.getCharacter(next) == '#') {
+            if (characterGrid.getCharacter(next) == '#') {
                 direction = changeDirectionOnBlock(direction)
                 continue
             }
@@ -53,10 +51,10 @@ fun main() {
         for (rowIndex in 0..<numberOfRows) {
             for (columnIndex in 0..<numberOfColumns) {
                 try {
-                    val newGrid = Grid(input)
-                    if (newGrid.getCharacter(columnIndex to rowIndex) == '#') continue
-                    newGrid.setCharacter(columnIndex to rowIndex, '#')
-                    part1(newGrid.toListString())
+                    val newCharacterGrid = CharacterGrid(input)
+                    if (newCharacterGrid.getCharacter(columnIndex to rowIndex) == '#') continue
+                    newCharacterGrid.setCharacter(columnIndex to rowIndex, '#')
+                    part1(newCharacterGrid.toListString())
                 } catch (_: Throwable) {
                     infiniteLoopCount += 1
                 }

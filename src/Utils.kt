@@ -21,7 +21,7 @@ fun Any?.println() = println(this)
 /**
  * A grid of characters.
  */
-class Grid(input: List<String>) {
+class CharacterGrid(input: List<String>) {
     val numberOfRows: Int = input.count()
     val numberOfColumns: Int = input.first().count()
     val data = input.map { it.toCharArray().toMutableList() }
@@ -33,8 +33,20 @@ class Grid(input: List<String>) {
     }
 
     enum class Direction {
-        Up, Down, Left, Right, UpLeft, UpRight, DownLeft, DownRight
+        Up, Down, Left, Right // UpLeft, UpRight, DownLeft, DownRight
     }
+
+    /**
+     * A sequence of locations in the grid, iterating by column then row, top down.
+     */
+    val indices: Sequence<Pair<Int, Int>>
+        get() = sequence {
+            for (rowIndex in 0..<numberOfRows) {
+                for (columnIndex in 0..<numberOfColumns) {
+                    yield(columnIndex to rowIndex)
+                }
+            }
+        }
 
     fun toListString(): List<String> = data.map { it.joinToString("") }
 
@@ -42,11 +54,9 @@ class Grid(input: List<String>) {
      * Find the first location of a character searching columns by row (left to right, row by row).
      */
     fun findLocation(character: Char): Pair<Int, Int>? {
-        for (rowIndex in 0..<numberOfRows) {
-            for (columnIndex in 0..<numberOfColumns) {
-                if (data[rowIndex][columnIndex] == character) {
-                    return columnIndex to rowIndex
-                }
+        for ((columnIndex, rowIndex) in indices) {
+            if (data[rowIndex][columnIndex] == character) {
+                return columnIndex to rowIndex
             }
         }
         return null
