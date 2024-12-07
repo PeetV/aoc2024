@@ -1,23 +1,26 @@
 fun main() {
 
     fun nextLocation(grid: CharacterGrid, location: Pair<Int, Int>, direction: Direction): Pair<Int, Int>? {
-        val nextLocation = when (direction) {
+        val nextLocation:  Pair<Int, Int> = when (direction) {
             Direction.Up -> location.first to (location.second - 1)
             Direction.Down -> location.first to (location.second + 1)
             Direction.Left -> (location.first - 1) to location.second
             Direction.Right -> (location.first + 1) to location.second
+            else -> location.first to (location.second - 1)
         }
         if (!grid.isInBounds(nextLocation)) return null
         return nextLocation
     }
 
     fun changeDirectionOnBlock(direction: Direction): Direction {
-        return when (direction) {
+        val newDirection: Direction = when (direction) {
             Direction.Up -> Direction.Right
             Direction.Down -> Direction.Left
             Direction.Left -> Direction.Up
             Direction.Right -> Direction.Down
+            else -> Direction.Up
         }
+        return newDirection
     }
 
     fun part1(input: List<String>): Int {

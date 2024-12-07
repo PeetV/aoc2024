@@ -7,7 +7,7 @@ import kotlin.io.path.readText
  * An enum of directions on a grid.
  */
 enum class Direction {
-    Up, Down, Left, Right // UpLeft, UpRight, DownLeft, DownRight
+    Up, Down, Left, Right, UpLeft, UpRight, DownLeft, DownRight
 }
 
 /**
@@ -29,6 +29,7 @@ fun Any?.println() = println(this)
  * A grid of characters.
  */
 class CharacterGrid(input: List<String>) {
+
     val numberOfRows: Int = input.count()
     val numberOfColumns: Int = input.first().count()
     val data = input.map { it.toCharArray().toMutableList() }
@@ -107,6 +108,40 @@ class CharacterGrid(input: List<String>) {
         if (location.first < 0 || location.first > (numberOfColumns - 1)) return false
         if (location.second < 0 || location.second > (numberOfRows - 1)) return false
         return true
+    }
+
+}
+
+/**
+ * A location on a two-dimensional grid, where X is the column position and Y is the row position.
+ */
+class XYLocation(var x: Int, var y: Int, var direction: Direction?) {
+
+    /**
+     * Get the x and y coordinates of the location as a 'Pair'.
+     */
+    var xy: Pair<Int, Int>
+        get() = x to y
+        set(xy: Pair<Int, Int>) {
+            x = xy.first
+            y = xy.second
+        }
+
+    /**
+     * Get the location one step away in the specified direction.
+     */
+    fun nextLocation(direction: Direction): XYLocation {
+        this.direction = direction
+        return when (direction) {
+            Direction.Up -> XYLocation(x, y - 1, direction)
+            Direction.Down -> XYLocation(x, y + 1, direction)
+            Direction.Left -> XYLocation(x - 1, y, direction)
+            Direction.Right -> XYLocation(x + 1, y, direction)
+            Direction.UpLeft -> XYLocation(x - 1, y - 1, direction)
+            Direction.UpRight -> XYLocation(x + 1, y - 1, direction)
+            Direction.DownLeft -> XYLocation(x - 1, y + 1, direction)
+            Direction.DownRight -> XYLocation(x + 1, y + 1, direction)
+        }
     }
 
 }
