@@ -57,7 +57,7 @@ fun main() {
                     val newCharacterGrid = CharacterGrid(input)
                     if (newCharacterGrid.getCharacter(columnIndex to rowIndex) == '#') continue
                     newCharacterGrid.setCharacter(columnIndex to rowIndex, '#')
-                    part1(newCharacterGrid.toStringList())
+                    part1(newCharacterGrid.rowStrings.toList())
                 } catch (_: Throwable) {
                     infiniteLoopCount += 1
                 }

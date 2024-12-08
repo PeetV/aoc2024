@@ -42,8 +42,6 @@ class CharacterGrid(input: List<String>) {
 
     override fun toString(): String = data.joinToString("\n") { it.joinToString("") }
 
-    fun toStringList(): List<String> = data.map { it.joinToString("") }
-
     /**
      * A sequence of locations in the grid, iterating by column then row, top down.
      */
