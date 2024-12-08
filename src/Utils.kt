@@ -40,6 +40,10 @@ class CharacterGrid(input: List<String>) {
         }
     }
 
+    override fun toString(): String = data.joinToString("\n") { it.joinToString("") }
+
+    fun toStringList(): List<String> = data.map { it.joinToString("") }
+
     /**
      * A sequence of locations in the grid, iterating by column then row, top down.
      */
@@ -85,9 +89,18 @@ class CharacterGrid(input: List<String>) {
         data[location.second][location.first] = character
     }
 
-    override fun toString(): String = data.joinToString("\n") { it.joinToString("") }
-
-    fun toStringList(): List<String> = data.map { it.joinToString("") }
+    /**
+     * Count the number of occurrences of a character.
+     */
+    fun countCharacter(character: Char): Int {
+        var result = 0
+        for ((columnIndex, rowIndex) in indices) {
+            if (data[rowIndex][columnIndex] == character) {
+                result += 1
+            }
+        }
+        return result
+    }
 
     /**
      * Find the first location of a character searching columns by row (left to right, row by row).
@@ -115,7 +128,7 @@ class CharacterGrid(input: List<String>) {
 /**
  * A location on a two-dimensional grid, where X is the column position and Y is the row position.
  */
-class XYLocation(var x: Int, var y: Int, var direction: Direction?) {
+data class XYLocation(var x: Int, var y: Int, var direction: Direction?) {
 
     /**
      * Get the x and y coordinates of the location as a 'Pair'.
@@ -127,20 +140,22 @@ class XYLocation(var x: Int, var y: Int, var direction: Direction?) {
             y = xy.second
         }
 
+    override fun toString(): String = "$xy"
+
     /**
      * Get the location one step away in the specified direction.
      */
-    fun nextLocation(direction: Direction): XYLocation {
+    fun nextLocation(direction: Direction, step: Int = 1): XYLocation {
         this.direction = direction
         return when (direction) {
-            Direction.North -> XYLocation(x, y - 1, direction)
-            Direction.South -> XYLocation(x, y + 1, direction)
-            Direction.West -> XYLocation(x - 1, y, direction)
-            Direction.East -> XYLocation(x + 1, y, direction)
-            Direction.NorthWest -> XYLocation(x - 1, y - 1, direction)
-            Direction.NorthEast -> XYLocation(x + 1, y - 1, direction)
-            Direction.SouthWest -> XYLocation(x - 1, y + 1, direction)
-            Direction.SouthEast -> XYLocation(x + 1, y + 1, direction)
+            Direction.North -> XYLocation(x, y - step, direction)
+            Direction.South -> XYLocation(x, y + step, direction)
+            Direction.West -> XYLocation(x - step, y, direction)
+            Direction.East -> XYLocation(x + step, y, direction)
+            Direction.NorthWest -> XYLocation(x - step, y - step, direction)
+            Direction.NorthEast -> XYLocation(x + step, y - step, direction)
+            Direction.SouthWest -> XYLocation(x - step, y + step, direction)
+            Direction.SouthEast -> XYLocation(x + step, y + step, direction)
         }
     }
 
