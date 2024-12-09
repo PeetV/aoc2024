@@ -1,3 +1,20 @@
+kotlin {
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(21)) // Match Java version
+    }
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
+
+tasks.withType<JavaCompile> {
+    sourceCompatibility = "21"
+    targetCompatibility = "21"
+}
+
 plugins {
     kotlin("jvm") version "2.0.21"
 }
