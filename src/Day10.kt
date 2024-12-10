@@ -52,14 +52,13 @@ fun main() {
         var result = 0
         for (zeroLocation in zeroLocations) {
             var stack = mutableListOf<XYLocation>(zeroLocation)
-            var level = 0
-            while (level < 9) {
+            while (true) {
                 val newStack = mutableListOf<XYLocation>()
                 for (location in stack) {
                     val locationChildren = graph.childNodes(location).getOrThrow()
                     newStack.addAll(locationChildren)
-                    level += 1
                 }
+                if (newStack.isEmpty()) break
                 stack = newStack
             }
             result += stack.count()
@@ -70,12 +69,11 @@ fun main() {
     // Test input from the `src/Day10_test.txt` file
     val testInput = readInput("Day10_test")
     check(part1(testInput) == 36)
-    println(part2(testInput))
-//    check(part2(testInput) == 81)
+    check(part2(testInput) == 81)
 
     // Input from the `src/Day10.txt` file
-//    val input = readInput("Day10")
-//    part1(input).println()
-//    part2(input).println()
+    val input = readInput("Day10")
+    part1(input).println()
+    part2(input).println()
 
 }
