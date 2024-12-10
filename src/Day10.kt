@@ -1,4 +1,5 @@
 import ktml.NodeMappedGraph
+import kotlin.math.abs
 
 fun main() {
 
@@ -33,6 +34,8 @@ fun main() {
         var result = 0
         for (zeroLocation in zeroLocations) {
             for (nineLocation in nineLocations) {
+                if (abs(zeroLocation.x - nineLocation.x) > 10) continue
+                if (abs(zeroLocation.y - nineLocation.y) > 10) continue
                 val path = graph.shortestPathDijkstra(fromNode = zeroLocation, toNode = nineLocation, { it })
                 if (path.isSuccess) {
                     result += 1
