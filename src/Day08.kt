@@ -6,7 +6,7 @@ fun main() {
             val character = grid.getCharacter(columnIndex to rowIndex)
             if (character == '.') continue
             val workingList = frequencies[character] ?: mutableListOf()
-            workingList.add(XYLocation(columnIndex, rowIndex, null))
+            workingList.add(XYLocation(columnIndex, rowIndex))
             frequencies[character] = workingList
         }
         return frequencies
@@ -17,8 +17,8 @@ fun main() {
         val (higher, lower) = antennaPair.sortedByDescending { it.y }
         val deltaX = higher.x - lower.x
         val deltaY = higher.y - lower.y
-        val higherNode = XYLocation(higher.x + deltaX, higher.y + deltaY, null)
-        val lowerNode = XYLocation(lower.x - deltaX, lower.y - deltaY, null)
+        val higherNode = XYLocation(higher.x + deltaX, higher.y + deltaY)
+        val lowerNode = XYLocation(lower.x - deltaX, lower.y - deltaY)
         return listOf(higherNode, lowerNode)
     }
 
@@ -30,7 +30,7 @@ fun main() {
         val deltaY = higher.y - lower.y
         var currentNode = higher
         while (true) {
-            val nextNode = XYLocation(currentNode.x + deltaX, currentNode.y + deltaY, null)
+            val nextNode = XYLocation(currentNode.x + deltaX, currentNode.y + deltaY)
             if (grid.isInBounds(nextNode.xy)) {
                 result.add(nextNode)
                 currentNode = nextNode
@@ -38,7 +38,7 @@ fun main() {
         }
         currentNode = lower
         while (true) {
-            val nextNode = XYLocation(currentNode.x - deltaX, currentNode.y - deltaY, null)
+            val nextNode = XYLocation(currentNode.x - deltaX, currentNode.y - deltaY)
             if (grid.isInBounds(nextNode.xy)) {
                 result.add(nextNode)
                 currentNode = nextNode

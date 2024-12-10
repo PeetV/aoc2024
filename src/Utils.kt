@@ -113,6 +113,19 @@ class CharacterGrid(input: List<String>) {
     }
 
     /**
+     * Find all the location of a character searching columns by row (left to right, row by row).
+     */
+    fun findLocations(character: Char): List<Pair<Int, Int>> {
+        val result = mutableListOf<Pair<Int, Int>>()
+        for ((columnIndex, rowIndex) in indices) {
+            if (data[rowIndex][columnIndex] == character) {
+                result.add(columnIndex to rowIndex)
+            }
+        }
+        return result
+    }
+
+    /**
      * Check if a location is inside the bounds of the grid.
      */
     fun isInBounds(location: Pair<Int, Int>): Boolean {
@@ -126,17 +139,12 @@ class CharacterGrid(input: List<String>) {
 /**
  * A location on a two-dimensional grid, where X is the column position and Y is the row position.
  */
-data class XYLocation(var x: Int, var y: Int, var direction: Direction?) {
+data class XYLocation(val x: Int, val y: Int) {
 
     /**
      * Get the x and y coordinates of the location as a 'Pair'.
      */
-    var xy: Pair<Int, Int>
-        get() = x to y
-        set(xy) {
-            x = xy.first
-            y = xy.second
-        }
+    val xy: Pair<Int, Int> get() = x to y
 
     override fun toString(): String = "$xy"
 
@@ -144,16 +152,15 @@ data class XYLocation(var x: Int, var y: Int, var direction: Direction?) {
      * Get the location one step away in the specified direction.
      */
     fun nextLocation(direction: Direction, step: Int = 1): XYLocation {
-        this.direction = direction
         return when (direction) {
-            Direction.North -> XYLocation(x, y - step, direction)
-            Direction.South -> XYLocation(x, y + step, direction)
-            Direction.West -> XYLocation(x - step, y, direction)
-            Direction.East -> XYLocation(x + step, y, direction)
-            Direction.NorthWest -> XYLocation(x - step, y - step, direction)
-            Direction.NorthEast -> XYLocation(x + step, y - step, direction)
-            Direction.SouthWest -> XYLocation(x - step, y + step, direction)
-            Direction.SouthEast -> XYLocation(x + step, y + step, direction)
+            Direction.North -> XYLocation(x, y - step)
+            Direction.South -> XYLocation(x, y + step)
+            Direction.West -> XYLocation(x - step, y)
+            Direction.East -> XYLocation(x + step, y)
+            Direction.NorthWest -> XYLocation(x - step, y - step)
+            Direction.NorthEast -> XYLocation(x + step, y - step)
+            Direction.SouthWest -> XYLocation(x - step, y + step)
+            Direction.SouthEast -> XYLocation(x + step, y + step)
         }
     }
 
