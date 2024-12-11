@@ -67,26 +67,23 @@ fun main() {
                 filesMoved.add(fileWithIndex.first)
             }
         }
-        println(filesWithIndex)
-        println(filesMoved)
         val finalGaps = gapsWithBuffer.toMutableList()
-        println(finalGaps)
         var result = 0L
         var index = 0L
         for (file in filesWithIndex) {
             val (fileIndex, fileCount) = if (filesMoved.contains(file.first)) 0 to file.second else file
             (0..<fileCount).forEach {
-                println("index $index x fileIndex $fileIndex + result $result")
                 result += index * fileIndex
                 index += 1
             }
             if (finalGaps.isNotEmpty()) {
                 val buffer = finalGaps.removeFirst()
-                if (buffer.second.count() == 0) index += 1
                 for (item in buffer.second) {
-                    println("index $index x item $item + result $result")
                     result += index * item
                     index += 1
+                }
+                if (buffer.first != 0) {
+                    (0..<buffer.first).forEach { index += 1 }
                 }
             }
         }
@@ -95,12 +92,12 @@ fun main() {
 
     // Test input from the `src/Day09_test.txt` file
     val testInput = readInput("Day09_test")
-//    check(part1(testInput) == 1928L)
-    println(part2(testInput))
+    check(part1(testInput) == 1928L)
+    check(part2(testInput) == 2858L)
 
     // Input from the `src/Day09.txt` file
     val input = readInput("Day09")
-//    part1(input).println()
-//    part2(input).println()
+    part1(input).println()
+    part2(input).println()
 
 }
