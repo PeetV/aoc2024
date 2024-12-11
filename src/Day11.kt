@@ -1,8 +1,3 @@
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.runBlocking
-
 fun main() {
 
     fun processStone(stone: Long): List<Long> {
@@ -16,61 +11,36 @@ fun main() {
                 result.add(digits.slice(0..<length).toLong())
                 result.add(digits.slice(length..digits.lastIndex).toLong())
             }
+
             else -> result.add(stone * 2024L)
         }
         return result
     }
 
-    fun iterateStone(stone: Long, iterations: Int): Int {
-        val iterationBuffer = MutableList<MutableList<Long>>(iterations) { mutableListOf() }
-        iterationBuffer[0] = processStone(stone).toMutableList()
-        var result = 0
-        val resultCache = mutableMapOf<Long, List<Long>>()
-        while (iterationBuffer.any { it.isNotEmpty() }) {
-            // If the last slot contains values remove them and add to counter
-            val lastSlot = iterationBuffer.last()
-            if (lastSlot.isNotEmpty()) {
-                result += lastSlot.count()
-                iterationBuffer[iterationBuffer.lastIndex] = mutableListOf()
-                if (iterationBuffer.all { it.isEmpty() }) break
-            }
-            // Find the last non-empty slot
-            val indexOfLast = iterationBuffer.indexOfLast { it.isNotEmpty() }
-            if (indexOfLast == -1) break
-            // Process one element from the last non-empty slot and add results to the next slot
-            val nextStone = iterationBuffer[indexOfLast].removeFirst()
-            val processResult = if (resultCache.keys.contains(nextStone)) {
-                 resultCache[nextStone]!!
-            } else {
-                val cacheItem = processStone(nextStone)
-                resultCache[nextStone] = cacheItem
-                cacheItem
-            }
-            iterationBuffer[indexOfLast + 1].addAll(processResult)
-        }
-        return result
-    }
-
-    fun part1(input: List<String>, iterations: Int): Int {
-        var result = 0
-        runBlocking {
-            val deferreds: List<Deferred<Int>> = input.first().split(" ").map  { stone ->
-                async {
-                    iterateStone(stone.toLong(), iterations)
+    fun part1(input: List<String>, iterations: Int): Long {
+        var stoneCounts = input.first().split(" ").map { it.toLong() }.groupingBy { it }.eachCount().toList()
+            .associate { it.first to it.second.toLong() }.toMutableMap()
+        repeat(iterations) {
+            var newCounts = mutableMapOf<Long, Long>()
+            for (stone in stoneCounts.keys) {
+                val count = stoneCounts[stone]!!
+                val processed = processStone(stone)
+                for (stone in processed) {
+                    newCounts[stone] = newCounts.getOrDefault(stone, 0) + count
                 }
             }
-            result = deferreds.awaitAll().sum()
+            stoneCounts = newCounts
         }
-        return result
+        return stoneCounts.values.sum()
     }
 
-    fun part2(input: List<String>, iterations: Int): Int {
+    fun part2(input: List<String>, iterations: Int): Long {
         return part1(input, iterations)
     }
 
     // Test input from the `src/Day11_test.txt` file
     val testInput = readInput("Day11_test")
-    check(part1(testInput, 25) == 55312)
+    check(part1(testInput, 25) == 55312L)
 
     // Input from the `src/Day11.txt` file
     val input = readInput("Day11")
