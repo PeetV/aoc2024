@@ -23,7 +23,7 @@ fun main() {
         var index = 0
         while (filesWithIndex.isNotEmpty()) {
             val current = filesWithIndex.removeFirst()
-            for (counter in 0..<(current.second)) {
+            repeat(current.second) {
                 result += index * current.first
                 index += 1
             }
