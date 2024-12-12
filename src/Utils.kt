@@ -76,6 +76,12 @@ class CharacterGrid(input: List<String>) {
         }
 
     /**
+     * Counts of each distinct character.
+     */
+    val characterCounts: Map<Char, Int>
+        get() = rowStrings.toList().joinToString("").groupingBy { it }.eachCount()
+
+    /**
      * Get the character at a location.
      */
     fun getCharacter(location: Pair<Int, Int>): Char = data[location.second][location.first]
