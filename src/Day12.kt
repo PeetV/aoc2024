@@ -40,6 +40,14 @@ fun main() {
         return area * perimeter
     }
 
+    fun calculateBulkPrice(region: List<XYLocation>, grid: CharacterGrid): Int {
+        val area = region.count()
+        var priceSum = 0
+
+        println("area $area price $priceSum")
+        return area * priceSum
+    }
+
     fun part1(input: List<String>): Int {
         val grid = CharacterGrid(input)
         val graph = buildGraph(grid)
@@ -55,12 +63,23 @@ fun main() {
     }
 
     fun part2(input: List<String>): Int {
-        return input.size
+        val grid = CharacterGrid(input)
+        val graph = buildGraph(grid)
+        val locationQueue = graph.nodes.toMutableList()
+        var result = 0
+        while (locationQueue.isNotEmpty()) {
+            val location = locationQueue.removeFirst()
+            val region = graph.walkDepthFirst(location, 10_000, includeBacktrack = false).getOrThrow()
+            region.forEach { locationQueue.remove(it) }
+            result += calculateBulkPrice(region, grid)
+        }
+        return result
     }
 
     // Test input from the `src/Day12_test.txt` file
     val testInput = readInput("Day12_test")
     check(part1(testInput) == 1930)
+    println(part2(testInput))
 
     // Input from the `src/Day12.txt` file
     val input = readInput("Day12")
