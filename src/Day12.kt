@@ -42,6 +42,7 @@ fun main() {
 
     fun calculateBulkPrice(region: List<XYLocation>, grid: CharacterGrid): Int {
         val area = region.count()
+        if (region.count() in listOf(1, 2)) return area * 4
         var priceSum = 0
 
         println("area $area price $priceSum")
