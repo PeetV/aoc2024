@@ -147,6 +147,8 @@ class CharacterGrid(input: List<String>) {
  */
 data class XYLocation(val x: Int, val y: Int) {
 
+    constructor(xy: Pair<Int, Int>): this(xy.first, xy.second)
+
     /**
      * Get the x and y coordinates of the location as a 'Pair'.
      */
