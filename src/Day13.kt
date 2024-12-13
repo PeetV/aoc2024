@@ -21,7 +21,7 @@ fun main() {
         }.toList().takeIf { it.isNotEmpty() }
     }
 
-    fun minimumTokes(a: Pair<Int, Int>, b: Pair<Int, Int>, target: Pair<Int, Int>): Int? {
+    fun minimumTokens(a: Pair<Int, Int>, b: Pair<Int, Int>, target: Pair<Int, Int>): Int? {
         val graph = NodeMappedGraph<XYLocation, Char>()
         val startNode = XYLocation(0, 0)
         // build the graph
@@ -52,18 +52,24 @@ fun main() {
         return if (weight.isFailure) null else weight.getOrThrow().toInt()
     }
 
+    fun minimumTokens2(a: Pair<Long, Long>, b: Pair<Long, Long>, target: Pair<Long, Long>): Long {
+
+        return 0
+    }
+
     fun part1(input: List<String>): Int {
         val inputs = extractInputs(input.joinToString("\n"))
         var total = 0
         for (input in inputs!!) {
             val (a, b, target) = input
-            total += minimumTokes(a, b, target) ?: 0
+            total += minimumTokens(a, b, target) ?: 0
         }
         return total
     }
 
     fun part2(input: List<String>): Int {
-        return input.size
+        println(minimumTokens2(94L to 34L, 22L to 67L, 10000000008400L to 10000000005400L))
+        return 0
     }
 
     // Test input from the `src/Day13_test.txt` file
@@ -74,7 +80,7 @@ fun main() {
     println(part2(testInput2))
 
     // Input from the `src/Day13.txt` file
-    val input = readInput("Day13")
+//    val input = readInput("Day13")
 //    part1(input).println()
 //    part2(input).println()
 
