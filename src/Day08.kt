@@ -7,7 +7,7 @@ fun main() {
             if (character == '.') continue
             val workingList = frequencies[character] ?: mutableListOf()
             workingList.add(XYLocation(columnIndex, rowIndex))
-            frequencies[character] = workingList
+            frequencies[character!!] = workingList
         }
         return frequencies
     }

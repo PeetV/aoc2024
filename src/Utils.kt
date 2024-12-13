@@ -84,7 +84,11 @@ class CharacterGrid(input: List<String>) {
     /**
      * Get the character at a location.
      */
-    fun getCharacter(location: Pair<Int, Int>): Char = data[location.second][location.first]
+    fun getCharacter(location: Pair<Int, Int>): Char? {
+        return if (isInBounds(location)) {
+            data[location.second][location.first]
+        } else null
+    }
 
     /**
      * Set the character at a location.

@@ -76,8 +76,8 @@ fun main() {
     val testInput = readInput("Day13_test")
 //    check(part1(testInput) == 480)
 
-    val testInput2 = readInput("Day13_test2")
-    println(part2(testInput2))
+//    val testInput2 = readInput("Day13_test2")
+//    println(part2(testInput2))
 
     // Input from the `src/Day13.txt` file
 //    val input = readInput("Day13")
