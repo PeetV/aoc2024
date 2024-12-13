@@ -44,7 +44,13 @@ fun main() {
         val area = region.count()
         if (region.count() in listOf(1, 2)) return area * 4
         var priceSum = 0
+        for (location in region) {
+            val north = location.nextLocation(Direction.North)
+            val south = location.nextLocation(Direction.South)
+            val east = location.nextLocation(Direction.East)
+            val west = location.nextLocation(Direction.West)
 
+        }
         println("area $area price $priceSum")
         return area * priceSum
     }
@@ -80,7 +86,7 @@ fun main() {
     // Test input from the `src/Day12_test.txt` file
     val testInput = readInput("Day12_test")
     check(part1(testInput) == 1930)
-    println(part2(testInput))
+    check(part2(testInput) == 1206)
 
     // Input from the `src/Day12.txt` file
     val input = readInput("Day12")
