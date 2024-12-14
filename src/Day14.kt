@@ -1,3 +1,5 @@
+import kotlin.math.abs
+
 fun main() {
 
     class Robot(var location: Pair<Int, Int>, val velocity: Pair<Int, Int>, val gridShape: Pair<Int, Int>) {
@@ -74,18 +76,15 @@ fun main() {
 
     fun part2(input: List<String>, width: Int, height: Int): Int {
         val robots = parseRobots(input, width to height)
+        println(robots.count())
         var seconds = 0
-        val maxSeconds = 10_000_000
+        val maxSeconds = 10_000
         while (seconds < maxSeconds) {
             seconds += 1
             robots.forEach { it.move() }
-            val quadrants = robots.map { it.inQuadrant() }
-            val counts = quadrants.groupingBy { it }.eachCount()
-            if ((counts[1]!! + counts[3]!!) == (counts[2]!! + counts[4]!!) &&
-                robots.count { it.location.second == 0 } == 1 &&
-                robots.count { it.location.second == 1 } == 3) break
+            // Add condition to break here if tree shape is found
+            break
         }
-        println("Reached $seconds seconds")
         val grid = CharacterGrid(List<String>(height) { ".".repeat(width) })
         for (robot in robots) {
             grid.setCharacter(robot.location, 'X')
