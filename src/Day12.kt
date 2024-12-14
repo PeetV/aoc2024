@@ -42,7 +42,7 @@ fun main() {
 
     fun calculateBulkPrice(region: List<XYLocation>, grid: CharacterGrid): Int {
         val area = region.count()
-        if (region.count() in listOf(1, 2)) return area * 4
+        if (listOf(1, 2).contains(area)) return area * 4
         var priceSum = 0
         for (location in region) {
             val locationChar = grid.getCharacter(location.xy)
@@ -77,7 +77,7 @@ fun main() {
         var result = 0
         while (locationQueue.isNotEmpty()) {
             val location = locationQueue.removeFirst()
-            val region = graph.walkDepthFirst(location, 10_000, includeBacktrack = false).getOrThrow()
+            val region = graph.walkDepthFirst(location, 100_000, includeBacktrack = false).getOrThrow()
             region.forEach { locationQueue.remove(it) }
             result += calculateRegionPrice(region, grid)
         }
@@ -91,7 +91,7 @@ fun main() {
         var result = 0
         while (locationQueue.isNotEmpty()) {
             val location = locationQueue.removeFirst()
-            val region = graph.walkDepthFirst(location, 10_000, includeBacktrack = false).getOrThrow()
+            val region = graph.walkDepthFirst(location, 100_000, includeBacktrack = false).getOrThrow()
             region.forEach { locationQueue.remove(it) }
             result += calculateBulkPrice(region, grid)
         }
