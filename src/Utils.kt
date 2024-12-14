@@ -94,6 +94,7 @@ class CharacterGrid(input: List<String>) {
      * Set the character at a location.
      */
     fun setCharacter(location: Pair<Int, Int>, character: Char) {
+        if (!isInBounds(location)) throw IndexOutOfBoundsException("$location is out of bounds")
         data[location.second][location.first] = character
     }
 
