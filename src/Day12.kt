@@ -54,22 +54,19 @@ fun main() {
             val northEastChar = grid.getCharacter(location.nextLocation(Direction.NorthEast).xy)
             val southWestChar = grid.getCharacter(location.nextLocation(Direction.SouthWest).xy)
             val southEastChar = grid.getCharacter(location.nextLocation(Direction.SouthEast).xy)
-            when {
-                northChar != locationChar && westChar != locationChar && northWestChar != locationChar && southChar == locationChar && eastChar == locationChar -> priceSum += 1
-                northChar != locationChar && westChar == locationChar && northEastChar != locationChar && eastChar!= locationChar && southChar == locationChar -> priceSum += 1
-                northChar == locationChar && westChar == locationChar && southEastChar != locationChar && eastChar!= locationChar && southChar != locationChar -> priceSum += 1
-                northChar == locationChar && eastChar == locationChar && southWestChar != locationChar && westChar!= locationChar && southChar!= locationChar -> priceSum += 1
-                northChar == locationChar && westChar == locationChar && northWestChar != locationChar -> priceSum += 1
-                northChar == locationChar && eastChar == locationChar && northEastChar != locationChar -> priceSum += 1
-                southChar == locationChar && eastChar == locationChar && southEastChar != locationChar -> priceSum += 1
-                westChar == locationChar && southChar == locationChar && southWestChar != locationChar -> priceSum += 1
-                northChar == locationChar && westChar != locationChar && southChar != locationChar && eastChar != locationChar -> priceSum += 2
-                southChar == locationChar && northChar != locationChar && eastChar != locationChar  && westChar != locationChar-> priceSum += 2
-                westChar == locationChar && northChar != locationChar && eastChar != locationChar && southChar != locationChar -> priceSum += 2
-                eastChar == locationChar && northChar != locationChar && westChar != locationChar && southChar != locationChar -> priceSum += 2
-            }
+            if (northChar != locationChar && westChar != locationChar && northWestChar != locationChar && southChar == locationChar && eastChar == locationChar) priceSum += 1
+            if (northChar != locationChar && westChar == locationChar && northEastChar != locationChar && eastChar!= locationChar && southChar == locationChar) priceSum += 1
+            if (northChar == locationChar && westChar == locationChar && southEastChar != locationChar && eastChar!= locationChar && southChar != locationChar) priceSum += 1
+            if (northChar == locationChar && eastChar == locationChar && southWestChar != locationChar && westChar!= locationChar && southChar!= locationChar) priceSum += 1
+            if (northChar == locationChar && westChar == locationChar && northWestChar != locationChar) priceSum += 1
+            if (northChar == locationChar && eastChar == locationChar && northEastChar != locationChar) priceSum += 1
+            if (southChar == locationChar && eastChar == locationChar && southEastChar != locationChar) priceSum += 1
+            if (westChar == locationChar && southChar == locationChar && southWestChar != locationChar) priceSum += 1
+            if (northChar == locationChar && westChar != locationChar && southChar != locationChar && eastChar != locationChar) priceSum += 2
+            if (southChar == locationChar && northChar != locationChar && eastChar != locationChar  && westChar != locationChar) priceSum += 2
+            if (westChar == locationChar && northChar != locationChar && eastChar != locationChar && southChar != locationChar) priceSum += 2
+            if (eastChar == locationChar && northChar != locationChar && westChar != locationChar && southChar != locationChar) priceSum += 2
         }
-        println("area $area price $priceSum")
         return area * priceSum
     }
 
@@ -108,7 +105,7 @@ fun main() {
 
     // Input from the `src/Day12.txt` file
     val input = readInput("Day12")
-//    part1(input).println()
-//    part2(input).println()
+    part1(input).println()
+    part2(input).println()
 
 }
