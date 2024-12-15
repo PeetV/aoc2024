@@ -145,6 +145,18 @@ class CharacterGrid(input: List<String>) {
         return true
     }
 
+    /**
+     * Swap characters at two specified locations in the grid.
+     */
+    fun swap(location1: Pair<Int, Int>, location2: Pair<Int, Int>) {
+        if (!isInBounds(location1)) throw IndexOutOfBoundsException("$location1 is out of bounds")
+        if (!isInBounds(location2)) throw IndexOutOfBoundsException("$location2 is out of bounds")
+        val character1 = getCharacter(location1)!!
+        val character2 = getCharacter(location2)!!
+        setCharacter(location1, character2)
+        setCharacter(location2, character1)
+    }
+
 }
 
 /**
