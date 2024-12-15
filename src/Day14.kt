@@ -39,6 +39,12 @@ fun main() {
             }
         }
 
+        fun distanceToOther(robot: Robot): Int {
+            val (x, y) = location
+            val (ox, oy) = robot.location
+            return abs(x - ox) + abs(y - oy)
+        }
+
     }
 
     fun parseRobots(input: List<String>, gridShape: Pair<Int, Int>): List<Robot> {
@@ -75,22 +81,30 @@ fun main() {
     }
 
     fun part2(input: List<String>, width: Int, height: Int): Int {
-        val robots = parseRobots(input, width to height)
-        println(robots.count())
+        var robots = parseRobots(input, width to height)
+        val numberOfRobots = robots.count().toDouble()
         var seconds = 0
-        val maxSeconds = 10_000
+        val maxSeconds = 20_000
+        var minRobotVariation = Double.MAX_VALUE
+        var minSeconds = Int.MAX_VALUE
         while (seconds < maxSeconds) {
             seconds += 1
             robots.forEach { it.move() }
-            // Add condition to break here if tree shape is found
-            break
+            val robotVariation = robots.sumOf { robot -> robots.sumOf { robot2 -> robot.distanceToOther(robot2) }.toDouble() / numberOfRobots }
+            if (robotVariation < minRobotVariation) {
+                "found lower at $seconds seconds".println()
+                minRobotVariation = robotVariation
+                minSeconds = seconds
+            }
         }
+        robots = parseRobots(input, width to height)
+        repeat (minSeconds) { robots.forEach { it.move() } }
         val grid = CharacterGrid(List<String>(height) { ".".repeat(width) })
         for (robot in robots) {
             grid.setCharacter(robot.location, 'X')
         }
-        println(grid)
-        return seconds
+        grid.println()
+        return minSeconds
     }
 
     // Test input from the `src/Day14_test.txt` file
@@ -99,7 +113,7 @@ fun main() {
 
     // Input from the `src/Day14.txt` file
     val input = readInput("Day14")
-//    part1(input, 101, 103).println()
+    part1(input, 101, 103).println()
     part2(input, 101, 103).println()
 
 }
