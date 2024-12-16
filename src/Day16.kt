@@ -39,7 +39,7 @@ fun main() {
         return turns
     }
 
-    fun pathToStart(pathTree: NodeMappedGraph<XYLocation, Double>, startNode: XYLocation, endNode: XYLocation): List<XYLocation> {
+    fun pathToStart(pathTree: NodeMappedGraph<XYLocation, Double>, endNode: XYLocation): List<XYLocation> {
         val result = mutableListOf<XYLocation>(endNode)
         var currentNode = endNode
         while (true) {
@@ -47,7 +47,6 @@ fun main() {
             if (parentNodes.isEmpty()) break
             val parentNode = parentNodes.first()
             result.add(parentNode)
-            if (parentNode == startNode) break
             currentNode = parentNode
         }
         return result
@@ -60,28 +59,23 @@ fun main() {
         while (endNodes.isNotEmpty()) {
             val newEndNodes = mutableListOf<XYLocation>()
             for (endNode in endNodes) {
-                println(endNode)
                 val children = graph.childNodes(endNode).getOrThrow()
-                val path = pathToStart(pathTree, from, endNode)
+                if (children.isEmpty()) continue
+                val path = pathToStart(pathTree, endNode)
                 for (child in children) {
-                    if (child == to) {
-                        if (!pathTree.hasNode(child)) pathTree.addNode(child)
-                        pathTree.addEdge(endNode, child, 1.0).getOrThrow()
-                        continue
-                    }
                     if (path.contains(child)) continue
                     if (!pathTree.hasNode(child)) pathTree.addNode(child)
                     pathTree.addEdge(endNode, child, 1.0).getOrThrow()
                     newEndNodes.add(child)
                 }
             }
-            endNodes = newEndNodes.filter { it != to }.toMutableList()
+            endNodes = newEndNodes
         }
         println("Path tree populated")
         val toParents = pathTree.parentNodes(to).getOrThrow()
         val result = mutableListOf<List<XYLocation>>()
         for (parent in toParents) {
-            val path = pathToStart(pathTree, from, parent).reversed().toMutableList()
+            val path = pathToStart(pathTree, parent).reversed().toMutableList()
             path.add(to)
             result.add(path)
         }
