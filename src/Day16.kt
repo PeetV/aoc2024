@@ -53,8 +53,8 @@ fun main() {
                     continue
                 }
                 for (childNode in graph.childNodes(path.last()).getOrThrow()) {
-                    val newPath = path.toMutableList()
-                    if (newPath.contains(childNode)) continue
+                    if (path.contains(childNode)) continue
+                    val newPath = path.toList().toMutableList()
                     newPath.add(childNode)
                     newPaths.add(newPath)
                 }
