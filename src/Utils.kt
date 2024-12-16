@@ -189,6 +189,24 @@ data class XYLocation(val x: Int, val y: Int) {
         }
     }
 
+    /**
+     * Get the direction of another location from this location.
+     */
+    fun directionTo(location: XYLocation): Direction {
+        if (this == location) throw IllegalArgumentException("directionTo locations must be different")
+        return when {
+            x == location.x && y > location.y -> Direction.North
+            x == location.x && y < location.y -> Direction.South
+            x > location.x && y == location.y -> Direction.West
+            x < location.x && y == location.y -> Direction.East
+            x < location.x && y < location.y -> Direction.SouthEast
+            x < location.x && y > location.y -> Direction.NorthEast
+            x > location.x && y < location.y -> Direction.SouthWest
+            x > location.x && y > location.y -> Direction.NorthWest
+            else -> Direction.North
+        }
+    }
+
 }
 
 /**
