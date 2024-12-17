@@ -39,47 +39,31 @@ fun main() {
         return turns
     }
 
-    fun pathToStart(pathTree: NodeMappedGraph<XYLocation, Double>, endNode: XYLocation): List<XYLocation> {
-        val result = mutableListOf<XYLocation>(endNode)
-        var currentNode = endNode
-        while (true) {
-            val parentNodes = pathTree.parentNodes(currentNode).getOrThrow()
-            if (parentNodes.isEmpty()) break
-            val parentNode = parentNodes.first()
-            result.add(parentNode)
-            currentNode = parentNode
-        }
-        return result
-    }
-
-    fun enumeratePaths(graph: NodeMappedGraph<XYLocation, Double>, from: XYLocation, to: XYLocation): List<List<XYLocation>> {
-        val pathTree = NodeMappedGraph<XYLocation, Double>()
-        pathTree.addNode(from).getOrThrow()
-        var endNodes = mutableListOf(from)
-        while (endNodes.isNotEmpty()) {
-            val newEndNodes = mutableListOf<XYLocation>()
-            for (endNode in endNodes) {
-                val children = graph.childNodes(endNode).getOrThrow()
-                if (children.isEmpty()) continue
-                val path = pathToStart(pathTree, endNode)
-                for (child in children) {
-                    if (path.contains(child)) continue
-                    if (!pathTree.hasNode(child)) pathTree.addNode(child)
-                    pathTree.addEdge(endNode, child, 1.0).getOrThrow()
-                    newEndNodes.add(child)
+    fun enumeratePaths(
+        graph: NodeMappedGraph<XYLocation, Double>, from: XYLocation, to: XYLocation
+    ): List<List<XYLocation>> {
+        var paths = mutableListOf(mutableListOf(from))
+        var iterations = 0
+        while (iterations < 10_000) {
+            iterations += 1
+            if (paths.all { it.last() == to }) break
+            paths = paths.filter { graph.childNodes(it.last()).getOrThrow().count() > 0 }.toMutableList()
+            val newPaths = mutableListOf<MutableList<XYLocation>>()
+            for (path in paths) {
+                if (path.last() == to) {
+                    newPaths.add(path)
+                    continue
+                }
+                for (childNode in graph.childNodes(path.last()).getOrThrow()) {
+                    if (path.contains(childNode)) continue
+                    val newPath = path.toList().toMutableList()
+                    newPath.add(childNode)
+                    newPaths.add(newPath)
                 }
             }
-            endNodes = newEndNodes
+            paths = newPaths
         }
-        println("Path tree populated")
-        val toParents = pathTree.parentNodes(to).getOrThrow()
-        val result = mutableListOf<List<XYLocation>>()
-        for (parent in toParents) {
-            val path = pathToStart(pathTree, parent).reversed().toMutableList()
-            path.add(to)
-            result.add(path)
-        }
-        return result
+        return paths
     }
 
     fun part1(input: List<String>): Int {
@@ -106,8 +90,8 @@ fun main() {
     check(part1(testInput) == 7036)
 
     // Test input from the `src/Day16_test2.txt` file
-//    testInput = readInput("Day16_test2")
-//    check(part1(testInput) == 11048)
+    testInput = readInput("Day16_test2")
+    check(part1(testInput) == 11048)
 
     // Input from the `src/Day16.txt` file
 //    val input = readInput("Day16")
