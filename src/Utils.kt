@@ -10,6 +10,8 @@ enum class Direction {
     North, South, West, East, NorthWest, NorthEast, SouthWest, SouthEast
 }
 
+val cityBlockDirections = listOf(Direction.North, Direction.South, Direction.East, Direction.West)
+
 /**
  * Read lines from the given input text file name (without including the .txt extension in the name).
  */
