@@ -29,17 +29,31 @@ fun main() {
         return path.count() - 1
     }
 
-    fun part2(input: List<String>): Int {
-        return input.size
+    fun part2(input: List<String>, minBytes: Int): Pair<Int, Int> {
+        val coordinates = input.map { it.split(",") }.map { (a, b) -> a.toInt() to b.toInt()}
+        val maxX = coordinates.maxOf { it.first }
+        val maxY = coordinates.maxOf { it.second }
+        val grid = CharacterGrid( List<String>(maxY + 1){ ".".repeat(maxX + 1) } )
+        coordinates.slice(0..<minBytes).forEach { grid.setCharacter(it, '#') }
+        var currentByte = 0 to 0
+        for (byte in coordinates.slice(minBytes..coordinates.lastIndex)) {
+            currentByte = byte
+            grid.setCharacter(byte, '#')
+            val graph = buildGraph(grid)
+            val path = graph.shortestPathDijkstra(XYLocation(0, 0), XYLocation(maxX, maxY), { it })
+            if (path.isFailure) break
+        }
+        return currentByte
     }
 
     // Test input from the `src/Day18_test.txt` file
     val testInput = readInput("Day18_test")
     check(part1(testInput, 12) == 22)
+    check(part2(testInput, 18) == 6 to 1)
 
     // Input from the `src/Day18.txt` file
     val input = readInput("Day18")
     part1(input, 1024).println()
-//    part2(input).println()
+    part2(input, 3000).println()
 
 }
