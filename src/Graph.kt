@@ -157,18 +157,91 @@ interface Graph<N, E> {
                 }
             }
         }
-        if (dist[getNodeIndex(toNode)] == Double.MAX_VALUE) return Result.failure(NoSuchElementException("Could not find a path."))
+        if (dist[getNodeIndex(toNode)] == Double.MAX_VALUE) return Result.failure(
+            NoSuchElementException("Could not find a path.")
+        )
         // Extract the path from the closest node list (prev).
         val path = mutableListOf(toNode)
         current = toNode
         while (current != fromNode) {
             val currentIndex = getNodeIndex(current)
             val next = getNode(prev[currentIndex]).getOrThrow()
-            path.add(next)
+            path.addFirst(next)
             current = next
         }
-        path.reverse()
         return Result.success(path)
+    }
+
+    /**
+     * Find the shortest path between nodes using the A* algorithm, taking into account edge weights.
+     *
+     * The effectiveness of this method depends on the ability to define an appropriate heuristic function `h`. The heuristic
+     * is used to reduce the number of nodes visited during path search and therefore an inappropriate `h` can result in
+     * the path found not being the true shortest path.
+     *
+     * Implemented in `GraphNodeMapped` given the implementation uses a node Map and therefore the same
+     * type constraints apply (i.e. `N` is a mappable type).
+     *
+     * See [Wikipedia](https://en.wikipedia.org/wiki/A*_search_algorithm).
+     * @param fromNode start of the path
+     * @param toNode target node for the path to end on
+     * @param getDistance a function to extract a distance from an edge and return a Double value. This enables
+     * typesafe handling of different types of edges.
+     * @param h a heuristic function, with h(n) estimating the cost to reach the goal node from node n
+     * @return a `Result` containing a list of node indexes representing the shortest path or a failure if indexes are out
+     * of bounds or if a path could not be found.
+     */
+    fun shortestPathAStar(
+        fromNode: N, toNode: N, getDistance: (E) -> Double, h: (N) -> Double
+    ): Result<List<N>> {
+        if (!hasNode(fromNode) || !hasNode(toNode)) return Result.failure(IllegalArgumentException("Node could not be found in the graph."))
+        val fromNodeIndex = getNodeIndex(fromNode)
+        val toNodeIndex = getNodeIndex(toNode)
+        // The set of discovered nodes that may need to be (re-)expanded. Initially, only the start node is known.
+        val openSet = mutableListOf<Int>(fromNodeIndex)
+        // For node n, cameFrom n is the node immediately preceding it on the cheapest path from the start to n
+        // currently known.
+        val cameFrom = MutableList(nodes.count()) { -1 }
+        // For node n, gScore n is the cost of the cheapest path from start to n currently known. The default value
+        // is infinity.
+        val gScore = MutableList(nodes.count()) { Double.POSITIVE_INFINITY }
+        gScore[fromNodeIndex] = 0.0
+        // For node n, fScore n = gScore n + h(n). fScore n represents our current best guess as to
+        // how cheap a path could be from start to finish if it goes through n.
+        val fScore = MutableList(nodes.count()) { Double.POSITIVE_INFINITY }
+        fScore[fromNodeIndex] = h(fromNode)
+        while (openSet.isNotEmpty()) {
+            // The node in openSet having the lowest fScore[] value
+            var currentIndex = openSet.map { it to fScore[it] }.minBy { it.second }.first
+            if (currentIndex == toNodeIndex) {
+                val path = mutableListOf(currentIndex)
+                while (currentIndex != fromNodeIndex) {
+                    currentIndex = cameFrom[currentIndex]
+                    path.addFirst(currentIndex)
+                }
+                return Result.success(path.map { getNode(it).getOrThrow() })
+            }
+            openSet.remove(currentIndex)
+            val children =
+                childNodes(getNode(currentIndex).getOrThrow()).getOrThrow().map { getNodeIndex(it) }
+            for (childIndex in children) {
+                // d(current,neighbor) is the weight of the edge from current to neighbor
+                // tentative_gScore is the distance from start to the neighbor through current:
+                // tentative_gScore := gScore[current] + d(current, neighbor)
+                val from = getNode(currentIndex).getOrThrow()
+                val to = getNode(childIndex).getOrThrow()
+                val eb = edgesBetween(from, to).getOrThrow().first()
+                val tentativeGScore = gScore[currentIndex] + getDistance(eb)
+                if (tentativeGScore < gScore[childIndex]) {
+                    // This path to neighbor is better than any previous one. Record it.
+                    cameFrom[childIndex] = currentIndex
+                    gScore[childIndex] = tentativeGScore
+                    fScore[childIndex] = tentativeGScore + h(getNode(childIndex).getOrThrow())
+                    if (!openSet.contains(childIndex)) openSet.add(childIndex)
+                }
+            }
+        }
+        return Result.failure(NoSuchElementException("A path could not be found"))
     }
 
     /**
@@ -242,7 +315,9 @@ interface Graph<N, E> {
      * @return a `Result` containing a list of nodes representing the path walked or a failure if the start or
      * end node could not be found in the graph.
      */
-    fun walkDepthFirst(fromNode: N, maxSteps: Int, includeBacktrack: Boolean = false): Result<List<N>> {
+    fun walkDepthFirst(
+        fromNode: N, maxSteps: Int, includeBacktrack: Boolean = false
+    ): Result<List<N>> {
         if (!hasNode(fromNode)) return Result.failure(IllegalArgumentException("Node could not be found in the graph."))
         val path = mutableListOf<N>()
         val visited = (0..<this.order).map { false }.toMutableList()
@@ -398,7 +473,11 @@ open class UnIndexedGraph<N, E> : Graph<N, E> {
     override fun addEdge(fromNode: N, toNode: N, edge: E): Result<Unit> {
         val fromNodeIndex = getNodeIndex(fromNode)
         val toNodeIndex = getNodeIndex(toNode)
-        if (fromNodeIndex == -1 || toNodeIndex == -1) return Result.failure(IllegalArgumentException("Node could not be found in the graph."))
+        if (fromNodeIndex == -1 || toNodeIndex == -1) return Result.failure(
+            IllegalArgumentException(
+                "Node could not be found in the graph."
+            )
+        )
         this.adjacencyList[fromNodeIndex].add(toNodeIndex)
         this._edges[fromNodeIndex].add(edge)
         return Result.success(Unit)
@@ -414,8 +493,12 @@ open class UnIndexedGraph<N, E> : Graph<N, E> {
      */
     fun addEdge(fromNodeIndex: Int, toNodeIndex: Int, edge: E): Result<Unit> {
         val maxIndex = this._nodes.lastIndex
-        if (fromNodeIndex > maxIndex || fromNodeIndex < 0) return Result.failure(IndexOutOfBoundsException("fromNodeIndex $fromNodeIndex out of bounds."))
-        if (toNodeIndex > maxIndex || toNodeIndex < 0) return Result.failure(IndexOutOfBoundsException("toNodeIndex $toNodeIndex out of bounds."))
+        if (fromNodeIndex > maxIndex || fromNodeIndex < 0) return Result.failure(
+            IndexOutOfBoundsException("fromNodeIndex $fromNodeIndex out of bounds.")
+        )
+        if (toNodeIndex > maxIndex || toNodeIndex < 0) return Result.failure(
+            IndexOutOfBoundsException("toNodeIndex $toNodeIndex out of bounds.")
+        )
         this.adjacencyList[fromNodeIndex].add(toNodeIndex)
         this._edges[fromNodeIndex].add(edge)
         return Result.success(Unit)
@@ -424,7 +507,11 @@ open class UnIndexedGraph<N, E> : Graph<N, E> {
     override fun updateEdge(fromNode: N, toNode: N, edge: E): Result<Unit> {
         val fromNodeIndex = getNodeIndex(fromNode)
         val toNodeIndex = getNodeIndex(toNode)
-        if (fromNodeIndex == -1 || toNodeIndex == -1) return Result.failure(IllegalArgumentException("Node could not be found in the graph."))
+        if (fromNodeIndex == -1 || toNodeIndex == -1) return Result.failure(
+            IllegalArgumentException(
+                "Node could not be found in the graph."
+            )
+        )
         return this.updateEdge(fromNodeIndex, toNodeIndex, edge)
     }
 
@@ -438,8 +525,12 @@ open class UnIndexedGraph<N, E> : Graph<N, E> {
      */
     fun updateEdge(fromNodeIndex: Int, toNodeIndex: Int, edge: E): Result<Unit> {
         val maxIndex = this._nodes.lastIndex
-        if (fromNodeIndex > maxIndex || fromNodeIndex < 0) return Result.failure(IndexOutOfBoundsException("fromNodeIndex $fromNodeIndex out of bounds."))
-        if (toNodeIndex > maxIndex || toNodeIndex < 0) return Result.failure(IndexOutOfBoundsException("toNodeIndex $toNodeIndex out of bounds."))
+        if (fromNodeIndex > maxIndex || fromNodeIndex < 0) return Result.failure(
+            IndexOutOfBoundsException("fromNodeIndex $fromNodeIndex out of bounds.")
+        )
+        if (toNodeIndex > maxIndex || toNodeIndex < 0) return Result.failure(
+            IndexOutOfBoundsException("toNodeIndex $toNodeIndex out of bounds.")
+        )
         val edgeIndex: Int = this.adjacencyList[fromNodeIndex].indexOf(toNodeIndex)
         if (edgeIndex == -1) {
             this.adjacencyList[fromNodeIndex].add(toNodeIndex)
@@ -453,7 +544,11 @@ open class UnIndexedGraph<N, E> : Graph<N, E> {
     override fun isConnected(fromNode: N, toNode: N): Result<Boolean> {
         val fromNodeIndex = getNodeIndex(fromNode)
         val toNodeIndex = getNodeIndex(toNode)
-        if (fromNodeIndex == -1 || toNodeIndex == -1) return Result.failure(IllegalArgumentException("Node could not be found in the graph."))
+        if (fromNodeIndex == -1 || toNodeIndex == -1) return Result.failure(
+            IllegalArgumentException(
+                "Node could not be found in the graph."
+            )
+        )
         val result = this.adjacencyList[fromNodeIndex].contains(toNodeIndex)
         return Result.success(result)
     }
@@ -467,8 +562,12 @@ open class UnIndexedGraph<N, E> : Graph<N, E> {
      */
     fun isConnected(fromNodeIndex: Int, toNodeIndex: Int): Result<Boolean> {
         val maxIndex = this._nodes.lastIndex
-        if (fromNodeIndex > maxIndex || fromNodeIndex < 0) return Result.failure(IndexOutOfBoundsException("fromNodeIndex $fromNodeIndex out of bounds."))
-        if (toNodeIndex > maxIndex || toNodeIndex < 0) return Result.failure(IndexOutOfBoundsException("toNodeIndex $toNodeIndex out of bounds."))
+        if (fromNodeIndex > maxIndex || fromNodeIndex < 0) return Result.failure(
+            IndexOutOfBoundsException("fromNodeIndex $fromNodeIndex out of bounds.")
+        )
+        if (toNodeIndex > maxIndex || toNodeIndex < 0) return Result.failure(
+            IndexOutOfBoundsException("toNodeIndex $toNodeIndex out of bounds.")
+        )
         val result = this.adjacencyList[fromNodeIndex].contains(toNodeIndex)
         return Result.success(result)
     }
@@ -481,8 +580,12 @@ open class UnIndexedGraph<N, E> : Graph<N, E> {
     fun edgesBetween(fromNodeIndex: Int, toNodeIndex: Int): Result<List<E>> {
         val result = mutableListOf<E>()
         val maxIndex = this._nodes.lastIndex
-        if (fromNodeIndex > maxIndex || fromNodeIndex < 0) return Result.failure(IndexOutOfBoundsException("fromNodeIndex $fromNodeIndex out of bounds."))
-        if (toNodeIndex > maxIndex || toNodeIndex < 0) return Result.failure(IndexOutOfBoundsException("toNodeIndex $toNodeIndex out of bounds."))
+        if (fromNodeIndex > maxIndex || fromNodeIndex < 0) return Result.failure(
+            IndexOutOfBoundsException("fromNodeIndex $fromNodeIndex out of bounds.")
+        )
+        if (toNodeIndex > maxIndex || toNodeIndex < 0) return Result.failure(
+            IndexOutOfBoundsException("toNodeIndex $toNodeIndex out of bounds.")
+        )
         for ((index, adjacency) in adjacencyList[fromNodeIndex].withIndex()) {
             if (adjacency == toNodeIndex) {
                 result.add(_edges[fromNodeIndex][index])
@@ -494,7 +597,11 @@ open class UnIndexedGraph<N, E> : Graph<N, E> {
     override fun edgesBetween(fromNode: N, toNode: N): Result<List<E>> {
         val fromNodeIndex = getNodeIndex(fromNode)
         val toNodeIndex = getNodeIndex(toNode)
-        if (fromNodeIndex == -1 || toNodeIndex == -1) return Result.failure(IllegalArgumentException("Node could not be found in the graph."))
+        if (fromNodeIndex == -1 || toNodeIndex == -1) return Result.failure(
+            IllegalArgumentException(
+                "Node could not be found in the graph."
+            )
+        )
         return edgesBetween(fromNodeIndex, toNodeIndex)
     }
 
@@ -656,7 +763,8 @@ class NodeIndexedGraph<N : Comparable<N>, E> : UnIndexedGraph<N, E>(), Graph<N, 
 
     val isNodeIndexed: Boolean get() = nodeIndexer != null
 
-    override fun toString(): String = "NodeIndexedGraph[order=${this.order}, size=${this.size}, indexed=$isNodeIndexed]"
+    override fun toString(): String =
+        "NodeIndexedGraph[order=${this.order}, size=${this.size}, indexed=$isNodeIndexed]"
 
     /**
      * Update the NodeIndexer, which sorts nodes in an index to use binary search lookups.
@@ -717,7 +825,7 @@ class NodeIndexedGraph<N : Comparable<N>, E> : UnIndexedGraph<N, E>(), Graph<N, 
  * @param N the type of graph nodes
  * @param E the type of graph edges
  */
-class NodeMappedGraph<N, E> : UnIndexedGraph<N, E>(), Graph<N, E> {
+open class NodeMappedGraph<N, E> : UnIndexedGraph<N, E>(), Graph<N, E> {
     private var nodeMap = mutableMapOf<N, Int>()
 
     override fun toString(): String = "NodeMappedGraph[order=${this.order}, size=${this.size}]"
@@ -767,69 +875,4 @@ class NodeMappedGraph<N, E> : UnIndexedGraph<N, E>(), Graph<N, E> {
 
     override fun getNodeIndex(node: N): Int = nodeMap.getOrDefault(node, -1)
 
-    /**
-     * Find the shortest path between nodes using the A* algorithm, taking into account edge weights.
-     *
-     * The effectiveness of this method depends on the ability to define an appropriate heuristic function `h`. The heuristic
-     * is used to reduce the number of nodes visited during path search and therefore an inappropriate `h` can result in
-     * the path found not being the true shortest path.
-     *
-     * Implemented in `GraphNodeMapped` given the implementation uses a node Map and therefore the same
-     * type constraints apply (i.e. `N` is a mappable type).
-     *
-     * See [Wikipedia](https://en.wikipedia.org/wiki/A*_search_algorithm).
-     * @param fromNode start of the path
-     * @param toNode target node for the path to end on
-     * @param getDistance a function to extract a distance from an edge and return a Double value. This enables
-     * typesafe handling of different types of edges.
-     * @param h a heuristic function, with h(n) estimating the cost to reach the goal node from node n
-     * @return a `Result` containing a list of node indexes representing the shortest path or a failure if indexes are out
-     * of bounds or if a path could not be found.
-     */
-    fun shortestPathAStar(fromNode: N, toNode: N, getDistance: (E) -> Double, h: (N) -> Double): Result<List<N>> {
-        if (!hasNode(fromNode) || !hasNode(toNode)) return Result.failure(IllegalArgumentException("Node could not be found in the graph."))
-        // The set of discovered nodes that may need to be (re-)expanded. Initially, only the start node is known.
-        val openSet = mutableListOf<N>()
-        openSet.add(fromNode)
-        // For node n, cameFrom[n] is the node immediately preceding it on the cheapest path from the start to n
-        // currently known.
-        val cameFrom = mutableMapOf<N, N>()
-        // For node n, gScore[n] is the cost of the cheapest path from start to n currently known. The default value
-        // is infinity.
-        val gScore = mutableMapOf<N, Double>()
-        gScore[fromNode] = 0.0
-        // For node n, fScore[n] = gScore[n] + h(n). fScore[n] represents our current best guess as to
-        // how cheap a path could be from start to finish if it goes through n.
-        val fScore = mutableMapOf<N, Double>()
-        fScore[fromNode] = h(fromNode)
-        while (openSet.isNotEmpty()) {
-            // The node in openSet having the lowest fScore[] value
-            var current = openSet.map { it to fScore[it]!! }.minBy { it.second }.first
-            if (current == toNode) {
-                val path = mutableListOf(current)
-                while (current in cameFrom.keys) {
-                    current = cameFrom[current]!!
-                    path.addFirst(current)
-                }
-                return Result.success(path.toList())
-            }
-            openSet.remove(current)
-            val children = childNodes(current).getOrNull() ?: listOf()
-            for (child in children) {
-                // d(current,neighbor) is the weight of the edge from current to neighbor
-                // tentative_gScore is the distance from start to the neighbor through current:
-                // tentative_gScore := gScore[current] + d(current, neighbor)
-                val eb = (edgesBetween(current, child).getOrNull() ?: listOf()).first()
-                val tentativeGScore = gScore[current]!! + getDistance(eb)
-                if (tentativeGScore < gScore.getOrDefault(child, Double.MAX_VALUE)) {
-                    // This path to neighbor is better than any previous one. Record it.
-                    cameFrom[child] = current
-                    gScore[child] = tentativeGScore
-                    fScore[child] = tentativeGScore + h(child)
-                    if (!openSet.contains(child)) openSet.add(child)
-                }
-            }
-        }
-        return Result.failure(NoSuchElementException("A path could not be found"))
-    }
 }
