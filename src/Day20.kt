@@ -45,8 +45,8 @@ fun main() {
         val graph = gridToGraph(grid)
         val startLocation = XYLocation(grid.findLocation('S')!!)
         val endLocation = XYLocation(grid.findLocation('E')!!)
-        val path = graph.shortestPathDijkstra(fromNode = startLocation, toNode = endLocation, { it }).getOrThrow()
-        for (from in path.slice(1..path.lastIndex)) {
+        val path = graph.shortestPathDijkstra(fromNode = startLocation, toNode = endLocation) { it }.getOrThrow()
+        for (from in path) {
             val fromIndex = path.indexOf(from)
             if (fromIndex == -1) throw IndexOutOfBoundsException("Unexpected index")
             val options = reachablePoints(from, grid)
@@ -72,7 +72,7 @@ fun main() {
 
     // Input from the `src/Day20.txt` file
     val input = readInput("Day20")
-    part1(input, 100).println() // Note had to plus 1 to match results
+    part1(input, 100).println()
 //    part2(input).println()
 
 }
