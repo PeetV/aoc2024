@@ -1,11 +1,7 @@
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.runBlocking
-
 fun main() {
 
     fun gridToGraph(grid: CharacterGrid): NodeMappedGraph<XYLocation, Double> {
-        val graph =  NodeMappedGraph<XYLocation, Double>()
+        val graph = NodeMappedGraph<XYLocation, Double>()
         val allowedToVisit = listOf('.', 'S', 'E')
         for ((columnIndex, rowIndex) in grid.indices) {
             val location = XYLocation(columnIndex, rowIndex)
@@ -26,59 +22,44 @@ fun main() {
         return graph
     }
 
-    fun hasOpenNeighbour(grid: CharacterGrid, location: Pair<Int, Int>): Boolean {
-        if (!grid.isInBounds(location)) return false
-        val allowedToVisit = listOf('.', 'S', 'E')
-        // Up
-        if (location.second > 0) {
-            val upC = grid.getCharacter(location.first to (location.second - 1))
-            if (allowedToVisit.contains(upC)) return true
+    fun reachablePoints(from: XYLocation, grid: CharacterGrid): List<XYLocation> {
+        val result = mutableListOf<XYLocation>()
+        for (step1Direction in cityBlockDirections) {
+            val step1Location = from.nextLocation(step1Direction)
+            val step1Char = grid.getCharacter(step1Location.xy)
+            if (step1Char != '#') continue
+            for (step2Direction in cityBlockDirections) {
+                val step2Location = step1Location.nextLocation(step2Direction)
+                val step2Char = grid.getCharacter(step2Location.xy)
+                if ((step2Char == '.' || step2Char == 'E')) {
+                    result.add(step2Location)
+                }
+            }
         }
-        // Down
-        if (location.second < (grid.numberOfRows - 1)) {
-            val downC = grid.getCharacter(location.first to (location.second + 1))
-            if (allowedToVisit.contains(downC)) return true
-        }
-        // Left
-        if (location.first > 0) {
-            val leftC = grid.getCharacter((location.first - 1) to location.second)
-            if (allowedToVisit.contains(leftC)) return true
-        }
-        // Right
-        if (location.first < (grid.numberOfColumns - 1)) {
-            val rightC = grid.getCharacter((location.first + 1) to location.second)
-            if (allowedToVisit.contains(rightC)) return true
-        }
-        return false
+        return result
     }
 
     fun part1(input: List<String>, threshold: Int): Int {
+        val results = mutableListOf<Int>()
         val grid = CharacterGrid(input)
         val graph = gridToGraph(grid)
         val startLocation = XYLocation(grid.findLocation('S')!!)
         val endLocation = XYLocation(grid.findLocation('E')!!)
-        val path = graph.shortestPathDijkstra(fromNode = startLocation, toNode = endLocation, {it})
-        val baselinePathSize = path.getOrThrow().count() - 1
-        var solutionCount = 0
-        runBlocking {
-            val deferredValues = grid.indices.toList().map {
-                val (columnIndex, rowIndex) = it
-                async {
-                    val grid2 = CharacterGrid(input)
-                    val character = grid2.getCharacter(columnIndex to rowIndex)
-                    if (character == '#' && hasOpenNeighbour(grid2, columnIndex to rowIndex)) {
-                        grid2.setCharacter(columnIndex to rowIndex, '.')
-                        val graph2 = gridToGraph(grid2)
-                        val path2 = graph2.shortestPathDijkstra(fromNode = startLocation, toNode = endLocation, { it })
-                        val path2Size = path2.getOrThrow().count() - 1
-                        val gain = baselinePathSize - path2Size
-                        gain
-                    } else 0
+        val path = graph.shortestPathDijkstra(fromNode = startLocation, toNode = endLocation, { it }).getOrThrow()
+        for (from in path.slice(1..path.lastIndex)) {
+            val fromIndex = path.indexOf(from)
+            if (fromIndex == -1) throw IndexOutOfBoundsException("Unexpected index")
+            val options = reachablePoints(from, grid)
+            for (to in options) {
+                val toIndex = path.indexOf(to)
+                if (toIndex == -1) throw IndexOutOfBoundsException("Unexpected index")
+                val saving = toIndex - fromIndex - 2
+                if (saving > 0) {
+                    results.add(saving)
                 }
             }
-            solutionCount = deferredValues.awaitAll().count { it >= threshold }
         }
-        return solutionCount
+        return results.count { it >= threshold }
     }
 
     fun part2(input: List<String>): Int {
@@ -91,7 +72,7 @@ fun main() {
 
     // Input from the `src/Day20.txt` file
     val input = readInput("Day20")
-    part1(input, 100).println()
+    part1(input, 100).println() // Note had to plus 1 to match results
 //    part2(input).println()
 
 }
